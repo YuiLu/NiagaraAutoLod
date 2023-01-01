@@ -32,18 +32,15 @@ SSelectModuleDialog::~SSelectModuleDialog()
 
 void SSelectModuleDialog::Construct(const FArguments& InArgs, TArray<FAssetData> InSelectedAssets)
 {
-	ParentWindow = InArgs._ParentWindow;
-
 	SelectedAssets = InSelectedAssets;
 
 	GetValidCategory();
 
-	//TSharedRef<SVerticalBox> RootBox =
-	ChildSlot[
+	TSharedRef<SVerticalBox> RootBox =
 	SNew(SVerticalBox)
 	+ SVerticalBox::Slot()
 	.Padding(10)
-	.FillHeight(1.0)
+	.AutoHeight()
 	[
 		SNew(SVerticalBox)
 		+ SVerticalBox::Slot()
@@ -113,7 +110,7 @@ void SSelectModuleDialog::Construct(const FArguments& InArgs, TArray<FAssetData>
 		]
 #pragma endregion
 		+ SVerticalBox::Slot()
-		  .FillHeight(1.0)
+		  .AutoHeight()
 		[
 			// 列表控件，用于显示自定义的NiagaraScript
 			SAssignNew(NiagaraModuleScriptList, SNiagaraModuleScriptList)
@@ -121,55 +118,30 @@ void SSelectModuleDialog::Construct(const FArguments& InArgs, TArray<FAssetData>
 				.OnModuleSeleted(this, &SSelectModuleDialog::OnModuleSeleted)
 				.AutoExpandActionMenu(false)
 		]
-
-		+ SVerticalBox::Slot().AutoHeight().VAlign(VAlign_Bottom).HAlign(HAlign_Right).Padding(0, 10, 0, 0)
-		[
-			SNew(SHorizontalBox)
-
-			+ SHorizontalBox::Slot().AutoWidth()
-			  .HAlign(HAlign_Right)
-			  .Padding(0, 0, 4, 0)
-			[
-				SNew(SButton)
-				.ContentPadding(FMargin(8, 2))
-				.OnClicked(this, &SSelectModuleDialog::OnOkButtonClicked)
-				.IsEnabled_Raw(this, &SSelectModuleDialog::IsOkButtonEnabled)
-				.Text(LOCTEXT("Finish_name", "Finish"))
-			]
-
-			+ SHorizontalBox::Slot().AutoWidth().HAlign(HAlign_Right)
-			[
-				SNew(SButton)
-				.ContentPadding(FMargin(8, 2))
-				.OnClicked(this, &SSelectModuleDialog::OnCancelButtonClicked)
-				.Text(LOCTEXT("Cancel_name", "Cancel"))
-			]
-		]
-	]
 	];
 	
 
-	//SWindow::Construct(
-	//	SWindow::FArguments()
-	//	.Title(LOCTEXT("NewSelectModuleWindowTitle", "Pick a module script for your system(s)"))
-	//	.SizingRule(ESizingRule::UserSized)
-	//	.ClientSize(FVector2D(450,640))
-	//	.SupportsMaximize(false)
-	//	.SupportsMinimize(false)
-	//	[
-	//		SAssignNew(Wizard, SWizard)
-	//		.OnCanceled(this, &SSelectModuleDialog::OnCancelButtonClicked)
-	//		.OnFinished(this, &SSelectModuleDialog::OnOkButtonClicked)
-	//		.CanFinish(this, &SSelectModuleDialog::IsOkButtonEnabled)
-	//		.ShowPageList(false)
-	//		
-	//		+ SWizard::Page()
-	//		.CanShow(true)
-	//		[
-	//			RootBox
-	//		]
-	//	]
-	//);
+	SWindow::Construct(
+		SWindow::FArguments()
+		.Title(LOCTEXT("NewSelectModuleWindowTitle", "Pick a module script for your system(s)"))
+		.SizingRule(ESizingRule::UserSized)
+		.ClientSize(FVector2D(450,640))
+		.SupportsMaximize(false)
+		.SupportsMinimize(false)
+		[
+			SAssignNew(Wizard, SWizard)
+			.OnCanceled(this, &SSelectModuleDialog::OnCancelButtonClicked)
+			.OnFinished(this, &SSelectModuleDialog::OnOkButtonClicked)
+			.CanFinish(this, &SSelectModuleDialog::IsOkButtonEnabled)
+			.ShowPageList(false)
+			
+			+ SWizard::Page()
+			.CanShow(true)
+			[
+				RootBox
+			]
+		]
+	);
 }
 
 bool SSelectModuleDialog::IsOkButtonEnabled() const
@@ -190,7 +162,7 @@ bool SSelectModuleDialog::IsOkButtonEnabled() const
  *   }
  * }
  */
-FReply SSelectModuleDialog::OnOkButtonClicked()
+void SSelectModuleDialog::OnOkButtonClicked()
 {
 	/* NiagaraSystemViewModel层级结构: 
 	 * FNiagaraSystemViewModel			资产视图模型，可以理解为特效整体 (Niagara System)
@@ -262,7 +234,7 @@ FReply SSelectModuleDialog::OnOkButtonClicked()
 			UEditorAssetLibrary::SaveLoadedAsset(NS);
 		}
 	}
-	ParentWindow.Get()->RequestDestroyWindow();
+	RequestDestroyWindow();
 
 	// 输出信息
 	if (bAutoLoadModule)
@@ -273,14 +245,11 @@ FReply SSelectModuleDialog::OnOkButtonClicked()
 	{
 		FMessageDialog::Open(EAppMsgType::Ok, FText::Format(LOCTEXT("AutoLoadModule_Fail", "{0}"), FText::FromString(FailedMessages)));
 	}
-
-	return FReply::Handled();
 }
 
-FReply SSelectModuleDialog::OnCancelButtonClicked()
+void SSelectModuleDialog::OnCancelButtonClicked()
 {
-	ParentWindow.Get()->RequestDestroyWindow();
-	return FReply::Handled();
+	RequestDestroyWindow();
 }
 
 void SSelectModuleDialog::GetValidCategory()

@@ -4,7 +4,6 @@
 #include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Views/STableRow.h"
 #include "Widgets/Layout/SScrollBox.h"
-#include "Widgets/Layout/SSeparator.h"
 
 
 void SNiagaraModuleScriptList::Construct(const FArguments& InArgs)
@@ -37,10 +36,12 @@ void SNiagaraModuleScriptList::Construct(const FArguments& InArgs)
 			.DelayChangeNotificationsWhileTyping(false)
 		]
 		
-		+ SVerticalBox::Slot().FillHeight(1.0)
+		+ SVerticalBox::Slot()
 		[
 			ListView.ToSharedRef()
 		]
+		+SVerticalBox::Slot()
+		.FillHeight(0.5)
 	];
 	RefreshAllModules();
 }
@@ -59,7 +60,7 @@ TSharedRef<ITableRow> SNiagaraModuleScriptList::OnGenerateRow(TSharedPtr<FNiagar
 
 void SNiagaraModuleScriptList::OnSelectionChanged(TSharedPtr< FNiagaraModuleScriptNode > InSelectedItem, ESelectInfo::Type SelectInfo)
 {
-	OnModuleSeleted.ExecuteIfBound(InSelectedItem ? InSelectedItem->AssetDataPtr : nullptr);
+	OnModuleSeleted.ExecuteIfBound(InSelectedItem->AssetDataPtr);
 }
 
 void SNiagaraModuleScriptList::RefreshAllModules()
