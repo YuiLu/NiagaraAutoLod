@@ -12,14 +12,14 @@ public class NiagaraAutoLod : ModuleRules
 			new string[] {
 				// ... add public include paths required here ...
 			}
-		);
+			);
 				
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
 				// ... add other private include paths required here ...
 			}
-		);
+			);
 			
 		
 		PublicDependencyModuleNames.AddRange(
@@ -28,7 +28,7 @@ public class NiagaraAutoLod : ModuleRules
 				"Core",
 				// ... add other public dependencies that you statically link with here ...
 			}
-		);
+			);
 			
 		
 		PrivateDependencyModuleNames.AddRange(
@@ -39,17 +39,18 @@ public class NiagaraAutoLod : ModuleRules
 				"Slate",
 				"SlateCore",
                 "ContentBrowser",
+				"Niagara",
                 "AppFramework",
-                "MainFrame",
                 "EditorStyle",
+                "MainFrame",
+                "NiagaraEditor",
                 "AssetRegistry",
                 "InputCore",
-                "Niagara",
-                "NiagaraEditor",
                 "EditorScriptingUtilities",
+				"UnrealEd",
 				// ... add private dependencies that you statically link with here ...	
 			}
-		);
+			);
 		
 		
 		DynamicallyLoadedModuleNames.AddRange(

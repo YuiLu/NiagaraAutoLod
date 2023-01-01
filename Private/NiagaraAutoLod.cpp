@@ -10,8 +10,7 @@
 void FNiagaraAutoLodModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
-
-	// 注册ContentBrowser中资产右键菜单创建时的回调
+	
 	FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
 	TArray<FContentBrowserMenuExtender_SelectedAssets>& CBAssetMenuExtenderDelegates = ContentBrowserModule.GetAllAssetViewContextMenuExtenders();
 	CBAssetMenuExtenderDelegates.Add(FContentBrowserMenuExtender_SelectedAssets::CreateRaw(this, &FNiagaraAutoLodModule::OnExtendCBAssetSelectionMenu));
@@ -22,8 +21,7 @@ void FNiagaraAutoLodModule::ShutdownModule()
 {
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
-
-	// 移除回调接口
+	
 	FContentBrowserModule* ContentBrowserModule = FModuleManager::GetModulePtr<FContentBrowserModule>(TEXT("ContentBrowser"));
 	if (ContentBrowserModule)
 	{
@@ -41,7 +39,7 @@ TSharedRef<FExtender> FNiagaraAutoLodModule::OnExtendCBAssetSelectionMenu(const 
 {
 	TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender());
 	
-	// 判断选中的资产是否全都是NiagaraSystem资产
+	// 判断右键点击的所有资产是否都是 NiagaraSystem
 	bool bNiagaraAssetsExtension = true;
 	for (const FAssetData& Asset : SelectedAssets)
 	{
@@ -52,7 +50,7 @@ TSharedRef<FExtender> FNiagaraAutoLodModule::OnExtendCBAssetSelectionMenu(const 
 		}
 	}
 
-	// 若是，则在“GetAssetActions”扩展点后面加入一个菜单选项
+	// 如果是，就在GetAssetActions扩展点上添加按钮
 	if (bNiagaraAssetsExtension)
 	{
 		MenuExtender->AddMenuExtension(
@@ -75,23 +73,19 @@ void FNiagaraAutoLodModule::NiagaraAssetMenuExtension(FMenuBuilder& MenuBuilder,
 	);
 }
 
-// 菜单按钮回调函数，筛选NiagaraSystem资产，并作为参数传给弹出的界面
+// 右键按钮的点击触发逻辑
 void FNiagaraAutoLodModule::ExtensionButtonClicked(TArray<FAssetData> SelectedAssets)
 {
 	TArray<FAssetData> NiagaraAssets;
 	for (const FAssetData& Asset : SelectedAssets)
 	{
-		if (Asset.AssetClass == UNiagaraSystem::StaticClass()->GetFName())
-		{
-			NiagaraAssets.Add(Asset);
-		}
+		NiagaraAssets.Add(Asset);
 	}
-
 	if (NiagaraAssets.IsEmpty())
 	{
 		return;
 	}
-	// 弹窗
+	// 将Asset传入Toolkit，为后续批量添加逻辑做准备
 	TSharedRef<FSelectModuleToolkit> SelectModuleToolkit = MakeShareable(new FSelectModuleToolkit);
 	SelectModuleToolkit->Initialize(NiagaraAssets);
 }

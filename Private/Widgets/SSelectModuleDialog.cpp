@@ -11,9 +11,8 @@
 
 #include "Widgets/Workflow/SWizard.h"
 #include "Widgets/Input/STextComboBox.h"
-#include "Widgets/Input/SSearchBox.h"
 
-#include "SNiagaraModuleScriptTree.h"
+#include "SNiagaraModuleScriptList.h"
 #include "EditorScriptingUtilities/Public/EditorAssetLibrary.h"
 #include "Misc/MessageDialog.h"
 
@@ -33,131 +32,144 @@ SSelectModuleDialog::~SSelectModuleDialog()
 
 void SSelectModuleDialog::Construct(const FArguments& InArgs, TArray<FAssetData> InSelectedAssets)
 {
+	ParentWindow = InArgs._ParentWindow;
+
 	SelectedAssets = InSelectedAssets;
 
 	GetValidCategory();
 
-	TSharedRef<SVerticalBox> RootBox =
+	//TSharedRef<SVerticalBox> RootBox =
+	ChildSlot[
 	SNew(SVerticalBox)
 	+ SVerticalBox::Slot()
-	.Padding(0, 5, 0, 5)
-	.AutoHeight()
+	.Padding(10)
+	.FillHeight(1.0)
 	[
-		SNew(SBox)
-		.Padding(FEditorStyle::GetMargin("StandardDialog.SlotPadding"))
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		  .HAlign(HAlign_Left)
+		  .AutoHeight()
 		[
-			SNew(SBorder)
-			.BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
-			.Padding(FMargin(7))
-			[
-				SNew(SBox)
-				[
-					SNew(SVerticalBox)
-					+ SVerticalBox::Slot()
-					.HAlign(HAlign_Left)
-					.AutoHeight()
-					[
-						SNew(STextBlock).Text(LOCTEXT("Select", "Target Location: "))
-					]
+			SNew(STextBlock).Text(LOCTEXT("Select", "Target Location: "))
+		]
 
 #pragma region	类型选择控件
-					+ SVerticalBox::Slot()
-					.HAlign(HAlign_Center)
-					.AutoHeight()
-					.Padding(0, 5, 0, 0)
-					[
-						SNew(SHorizontalBox)
+		+ SVerticalBox::Slot()
+		  .HAlign(HAlign_Center)
+		  .AutoHeight()
+		  .Padding(0, 5, 0, 0)
+		[
+			SNew(SHorizontalBox)
 
 #pragma region 选择一级生命周期: System/Emitter/Particle
-						+ SHorizontalBox::Slot()
-						.VAlign(VAlign_Center)
-						.AutoWidth()
-						.Padding(0, 0, 20, 0)
-						[
-							SNew(SHorizontalBox)
-							
-							+ SHorizontalBox::Slot()
-							.VAlign(VAlign_Center)
-							.AutoWidth()
-							[
-								SNew(STextBlock).Text(LOCTEXT("Category", "Category: "))
-							]
+			+ SHorizontalBox::Slot()
+			  .VAlign(VAlign_Center)
+			  .AutoWidth()
+			  .Padding(0, 0, 20, 0)
+			[
+				SNew(SHorizontalBox)
 
-							+ SHorizontalBox::Slot()
-							.VAlign(VAlign_Center)
-							[
-								SAssignNew(CategoryComboBox, STextComboBox)
-								.OptionsSource(&CategoryNames) // 设置Stack分类的可选项
-								.OnSelectionChanged(this, &SSelectModuleDialog::OnCategorySelectionChanged) // 点击选中后的回调接口
-								.InitiallySelectedItem(CategoryNames[0]) // 设置显示的初始选项
-							]
-						]
+				+ SHorizontalBox::Slot()
+				  .VAlign(VAlign_Center)
+				  .AutoWidth()
+				[
+					SNew(STextBlock).Text(LOCTEXT("Category", "Category: "))
+				]
+
+				+ SHorizontalBox::Slot()
+				  .VAlign(VAlign_Center)
+				[
+					SAssignNew(CategoryComboBox, STextComboBox)
+						.OptionsSource(&CategoryNames) // 设置Stack分类的可选项
+						.OnSelectionChanged(this, &SSelectModuleDialog::OnCategorySelectionChanged) // 选中后的回调接口
+						.InitiallySelectedItem(CategoryNames[0]) // 设置显示的初始选项
+				]
+			]
 #pragma endregion
 
 #pragma region 选择二级生命周期: Spawn/Update/...
-						+ SHorizontalBox::Slot()
-						.VAlign(VAlign_Center)
-						.AutoWidth()
-						[
-							SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			  .VAlign(VAlign_Center)
+			  .AutoWidth()
+			[
+				SNew(SHorizontalBox)
 
-							+ SHorizontalBox::Slot()
-							.VAlign(VAlign_Center)
-							.AutoWidth()
-							[
-								SNew(STextBlock).Text(LOCTEXT("SubCategory", "SubCategory: "))
-							]
+				+ SHorizontalBox::Slot()
+				  .VAlign(VAlign_Center)
+				  .AutoWidth()
+				[
+					SNew(STextBlock).Text(LOCTEXT("SubCategory", "SubCategory: "))
+				]
 
-							+ SHorizontalBox::Slot().VAlign(VAlign_Center)
-							[
-								SAssignNew(SubCategoryComboBox, STextComboBox)
-								.OptionsSource(&SubCategorySource) // 设置Stack子分类的可选项
-								.OnSelectionChanged(this, &SSelectModuleDialog::OnSubCategorySelectionChanged) // 选中后的回到接口
-								.InitiallySelectedItem(SubCategorySource[0]) // 设置显示的初始选项
-							]
-						]
-#pragma endregion
-					]
-#pragma endregion
-
-#pragma region Modules
-					+ SVerticalBox::Slot().AutoHeight()
-					[
-						// 树状控件，用于显示自定义的NiagaraScript
-						SAssignNew(NiagaraModuleScriptTree, SNiagaraModuleScriptTree)
-						// 设置委托注册接口
-						.OnCollectAllModules(this, &SSelectModuleDialog::CollectAllModules)
-						.OnModuleSeleted(this, &SSelectModuleDialog::OnModuleSeleted)
-						.AutoExpandActionMenu(true)
-					]
-#pragma endregion
+				+ SHorizontalBox::Slot().VAlign(VAlign_Center)
+				[
+					SAssignNew(SubCategoryComboBox, STextComboBox)
+						.OptionsSource(&SubCategorySource) // 设置Stack子分类的可选项
+						.OnSelectionChanged(this, &SSelectModuleDialog::OnSubCategorySelectionChanged) // 选中后的回调接口
+						.InitiallySelectedItem(SubCategorySource[0]) // 设置显示的初始选项
 				]
 			]
+#pragma endregion
 		]
+#pragma endregion
+		+ SVerticalBox::Slot()
+		  .FillHeight(1.0)
+		[
+			// 列表控件，用于显示自定义的NiagaraScript
+			SAssignNew(NiagaraModuleScriptList, SNiagaraModuleScriptList)
+				.OnCollectAllModules(this, &SSelectModuleDialog::CollectAllModules)
+				.OnModuleSeleted(this, &SSelectModuleDialog::OnModuleSeleted)
+				.AutoExpandActionMenu(false)
+		]
+
+		+ SVerticalBox::Slot().AutoHeight().VAlign(VAlign_Bottom).HAlign(HAlign_Right).Padding(0, 10, 0, 0)
+		[
+			SNew(SHorizontalBox)
+
+			+ SHorizontalBox::Slot().AutoWidth()
+			  .HAlign(HAlign_Right)
+			  .Padding(0, 0, 4, 0)
+			[
+				SNew(SButton)
+				.ContentPadding(FMargin(8, 2))
+				.OnClicked(this, &SSelectModuleDialog::OnOkButtonClicked)
+				.IsEnabled_Raw(this, &SSelectModuleDialog::IsOkButtonEnabled)
+				.Text(LOCTEXT("Finish_name", "Finish"))
+			]
+
+			+ SHorizontalBox::Slot().AutoWidth().HAlign(HAlign_Right)
+			[
+				SNew(SButton)
+				.ContentPadding(FMargin(8, 2))
+				.OnClicked(this, &SSelectModuleDialog::OnCancelButtonClicked)
+				.Text(LOCTEXT("Cancel_name", "Cancel"))
+			]
+		]
+	]
 	];
 	
 
-	SWindow::Construct(
-		SWindow::FArguments()
-		.Title(LOCTEXT("NewSelectModuleWindowTitle", "Pick a module script for your system(s)"))
-		.SizingRule(ESizingRule::UserSized)
-		.ClientSize(FVector2D(450,600))
-		.SupportsMaximize(false)
-		.SupportsMinimize(false)
-		[
-			SAssignNew(Wizard, SWizard)
-			.OnCanceled(this, &SSelectModuleDialog::OnCancelButtonClicked)
-			.OnFinished(this, &SSelectModuleDialog::OnOkButtonClicked)
-			.CanFinish(this, &SSelectModuleDialog::IsOkButtonEnabled)
-			.ShowPageList(false)
-			
-			+ SWizard::Page()
-			.CanShow(true)
-			[
-				RootBox
-			]
-		]
-	);
+	//SWindow::Construct(
+	//	SWindow::FArguments()
+	//	.Title(LOCTEXT("NewSelectModuleWindowTitle", "Pick a module script for your system(s)"))
+	//	.SizingRule(ESizingRule::UserSized)
+	//	.ClientSize(FVector2D(450,640))
+	//	.SupportsMaximize(false)
+	//	.SupportsMinimize(false)
+	//	[
+	//		SAssignNew(Wizard, SWizard)
+	//		.OnCanceled(this, &SSelectModuleDialog::OnCancelButtonClicked)
+	//		.OnFinished(this, &SSelectModuleDialog::OnOkButtonClicked)
+	//		.CanFinish(this, &SSelectModuleDialog::IsOkButtonEnabled)
+	//		.ShowPageList(false)
+	//		
+	//		+ SWizard::Page()
+	//		.CanShow(true)
+	//		[
+	//			RootBox
+	//		]
+	//	]
+	//);
 }
 
 bool SSelectModuleDialog::IsOkButtonEnabled() const
@@ -178,7 +190,7 @@ bool SSelectModuleDialog::IsOkButtonEnabled() const
  *   }
  * }
  */
-void SSelectModuleDialog::OnOkButtonClicked()
+FReply SSelectModuleDialog::OnOkButtonClicked()
 {
 	/* NiagaraSystemViewModel层级结构: 
 	 * FNiagaraSystemViewModel			资产视图模型，可以理解为特效整体 (Niagara System)
@@ -197,7 +209,6 @@ void SSelectModuleDialog::OnOkButtonClicked()
 		FailedMessages.Append(SystemName);
 		if (UNiagaraSystem* NS = Cast<UNiagaraSystem>(SelectedAsset.GetAsset()))
 		{
-			FNiagaraEditorModule& NiagaraEditorModule = FModuleManager::Get().LoadModuleChecked<FNiagaraEditorModule>("NiagaraEditor");
 			TSharedPtr<FNiagaraSystemViewModel> SystemViewModel = MakeShared<FNiagaraSystemViewModel>();
 			// 使用 Option 初始化 ViewModel, 否则会崩溃报错
 			FNiagaraSystemViewModelOptions SystemViewModelOptions = FNiagaraSystemViewModelOptions();
@@ -251,7 +262,7 @@ void SSelectModuleDialog::OnOkButtonClicked()
 			UEditorAssetLibrary::SaveLoadedAsset(NS);
 		}
 	}
-	RequestDestroyWindow();
+	ParentWindow.Get()->RequestDestroyWindow();
 
 	// 输出信息
 	if (bAutoLoadModule)
@@ -262,11 +273,14 @@ void SSelectModuleDialog::OnOkButtonClicked()
 	{
 		FMessageDialog::Open(EAppMsgType::Ok, FText::Format(LOCTEXT("AutoLoadModule_Fail", "{0}"), FText::FromString(FailedMessages)));
 	}
+
+	return FReply::Handled();
 }
 
-void SSelectModuleDialog::OnCancelButtonClicked()
+FReply SSelectModuleDialog::OnCancelButtonClicked()
 {
-	RequestDestroyWindow();
+	ParentWindow.Get()->RequestDestroyWindow();
+	return FReply::Handled();
 }
 
 void SSelectModuleDialog::GetValidCategory()

@@ -3,9 +3,9 @@
 #include "Widgets/SWindow.h"
 
 class SWizard;
-class SNiagaraModuleScriptTree;
+class SNiagaraModuleScriptList;
 
-class SSelectModuleDialog : public SWindow
+class SSelectModuleDialog : public SCompoundWidget
 {
 public:
 	SSelectModuleDialog();
@@ -13,14 +13,17 @@ public:
 
 	SLATE_BEGIN_ARGS(SSelectModuleDialog)
 	{}
+	SLATE_ATTRIBUTE(TSharedPtr<SWindow>, ParentWindow)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs, TArray<FAssetData> InSelectedAssets);
 
 private:
+	TAttribute< TSharedPtr< SWindow > > ParentWindow;
+
 	bool IsOkButtonEnabled() const;
-	void OnOkButtonClicked();
-	void OnCancelButtonClicked();
+	FReply OnOkButtonClicked();
+	FReply OnCancelButtonClicked();
 	
 	// 获取所有有效的分类和子分类名称
 	void GetValidCategory();
@@ -43,7 +46,7 @@ private:
 	void OnSubCategorySelectionChanged(TSharedPtr<FString> NewSelection, ESelectInfo::Type SelectInfo);
 
 	// Modules列表控件
-	TSharedPtr<SNiagaraModuleScriptTree> NiagaraModuleScriptTree;
+	TSharedPtr<SNiagaraModuleScriptList> NiagaraModuleScriptList;
 	void CollectAllModules(TArray<FAssetData>& InOutModules);
 	void OnModuleSeleted(FAssetData* InSelectedAssetData);
 };
