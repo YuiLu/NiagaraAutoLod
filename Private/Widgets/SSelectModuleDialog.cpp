@@ -37,8 +37,7 @@ void SSelectModuleDialog::Construct(const FArguments& InArgs, TArray<FAssetData>
 	SelectedAssets = InSelectedAssets;
 
 	GetValidCategory();
-
-	//TSharedRef<SVerticalBox> RootBox =
+	
 	ChildSlot[
 	SNew(SVerticalBox)
 	+ SVerticalBox::Slot()
@@ -101,7 +100,8 @@ void SSelectModuleDialog::Construct(const FArguments& InArgs, TArray<FAssetData>
 					SNew(STextBlock).Text(LOCTEXT("SubCategory", "SubCategory: "))
 				]
 
-				+ SHorizontalBox::Slot().VAlign(VAlign_Center)
+				+ SHorizontalBox::Slot()
+				  .VAlign(VAlign_Center)
 				[
 					SAssignNew(SubCategoryComboBox, STextComboBox)
 						.OptionsSource(&SubCategorySource) // 设置Stack子分类的可选项
@@ -112,21 +112,25 @@ void SSelectModuleDialog::Construct(const FArguments& InArgs, TArray<FAssetData>
 #pragma endregion
 		]
 #pragma endregion
+		// 列表控件，用于显示自定义的NiagaraScript
 		+ SVerticalBox::Slot()
 		  .FillHeight(1.0)
 		[
-			// 列表控件，用于显示自定义的NiagaraScript
 			SAssignNew(NiagaraModuleScriptList, SNiagaraModuleScriptList)
 				.OnCollectAllModules(this, &SSelectModuleDialog::CollectAllModules)
 				.OnModuleSeleted(this, &SSelectModuleDialog::OnModuleSeleted)
 				.AutoExpandActionMenu(false)
 		]
 
-		+ SVerticalBox::Slot().AutoHeight().VAlign(VAlign_Bottom).HAlign(HAlign_Right).Padding(0, 10, 0, 0)
+		+ SVerticalBox::Slot().AutoHeight()
+		  .VAlign(VAlign_Bottom)
+		  .HAlign(HAlign_Right)
+		  .Padding(0, 10, 0, 0)
 		[
 			SNew(SHorizontalBox)
-
-			+ SHorizontalBox::Slot().AutoWidth()
+			// Finish Button
+			+ SHorizontalBox::Slot()
+			  .AutoWidth()
 			  .HAlign(HAlign_Right)
 			  .Padding(0, 0, 4, 0)
 			[
@@ -136,8 +140,11 @@ void SSelectModuleDialog::Construct(const FArguments& InArgs, TArray<FAssetData>
 				.IsEnabled_Raw(this, &SSelectModuleDialog::IsOkButtonEnabled)
 				.Text(LOCTEXT("Finish_name", "Finish"))
 			]
-
-			+ SHorizontalBox::Slot().AutoWidth().HAlign(HAlign_Right)
+			
+			// Cancel Button
+			+ SHorizontalBox::Slot()
+			  .AutoWidth()
+			  .HAlign(HAlign_Right)
 			[
 				SNew(SButton)
 				.ContentPadding(FMargin(8, 2))
@@ -147,34 +154,15 @@ void SSelectModuleDialog::Construct(const FArguments& InArgs, TArray<FAssetData>
 		]
 	]
 	];
-	
-
-	//SWindow::Construct(
-	//	SWindow::FArguments()
-	//	.Title(LOCTEXT("NewSelectModuleWindowTitle", "Pick a module script for your system(s)"))
-	//	.SizingRule(ESizingRule::UserSized)
-	//	.ClientSize(FVector2D(450,640))
-	//	.SupportsMaximize(false)
-	//	.SupportsMinimize(false)
-	//	[
-	//		SAssignNew(Wizard, SWizard)
-	//		.OnCanceled(this, &SSelectModuleDialog::OnCancelButtonClicked)
-	//		.OnFinished(this, &SSelectModuleDialog::OnOkButtonClicked)
-	//		.CanFinish(this, &SSelectModuleDialog::IsOkButtonEnabled)
-	//		.ShowPageList(false)
-	//		
-	//		+ SWizard::Page()
-	//		.CanShow(true)
-	//		[
-	//			RootBox
-	//		]
-	//	]
-	//);
 }
 
 bool SSelectModuleDialog::IsOkButtonEnabled() const
 {
-	return SelectedCategory.IsValid() && SelectedSubCategory.IsValid() && SelectedCategory != NoneCategory && SelectedSubCategory != NoneCategory && SelectedModuleAssetData != nullptr;
+	return SelectedCategory.IsValid() &&
+		   SelectedSubCategory.IsValid() &&
+		   SelectedCategory != NoneCategory &&
+		   SelectedSubCategory != NoneCategory &&
+		   SelectedModuleAssetData != nullptr;
 }
 
 /* 核心逻辑: 

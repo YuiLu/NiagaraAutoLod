@@ -10,13 +10,6 @@
 // Initialize
 void FSelectModuleToolkit::Initialize(TArray<FAssetData>& InNiagaraAssets)
 {
-	//// 获取UE4主编辑器窗口的SWindow作为ParentWindow
-	//IMainFrameModule& MainFrame = FModuleManager::LoadModuleChecked<IMainFrameModule>("MainFrame");
-	//TSharedPtr<SWindow> ParentWindow = MainFrame.GetParentWindow();
-	//// 添加自定义模态窗口
-	//TSharedRef<SSelectModuleDialog> SelectModuleDialog = SNew(SSelectModuleDialog, InNiagaraAssets);
-	//FSlateApplication::Get().AddModalWindow(SelectModuleDialog, ParentWindow);
-
 	const FVector2D DEFAULT_WINDOW_SIZE = FVector2D(450, 640);
 	TSharedRef< SWindow > SelectModuleDialogWindow = SNew(SWindow)
 		.Title(LOCTEXT("NewSelectModuleWindowTitle", "Pick a module script for your system(s)"))

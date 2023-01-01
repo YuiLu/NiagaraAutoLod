@@ -4,7 +4,6 @@
 #include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Views/STableRow.h"
 #include "Widgets/Layout/SScrollBox.h"
-#include "Widgets/Layout/SSeparator.h"
 
 
 void SNiagaraModuleScriptList::Construct(const FArguments& InArgs)
@@ -37,7 +36,8 @@ void SNiagaraModuleScriptList::Construct(const FArguments& InArgs)
 			.DelayChangeNotificationsWhileTyping(false)
 		]
 		
-		+ SVerticalBox::Slot().FillHeight(1.0)
+		+ SVerticalBox::Slot()
+		.FillHeight(1.0)
 		[
 			ListView.ToSharedRef()
 		]
