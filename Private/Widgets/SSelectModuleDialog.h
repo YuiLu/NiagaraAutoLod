@@ -5,7 +5,7 @@
 class SWizard;
 class SNiagaraModuleScriptList;
 
-class SSelectModuleDialog : public SWindow
+class SSelectModuleDialog : public SCompoundWidget
 {
 public:
 	SSelectModuleDialog();
@@ -13,14 +13,17 @@ public:
 
 	SLATE_BEGIN_ARGS(SSelectModuleDialog)
 	{}
+	SLATE_ATTRIBUTE(TSharedPtr<SWindow>, ParentWindow)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs, TArray<FAssetData> InSelectedAssets);
 
 private:
+	TAttribute< TSharedPtr< SWindow > > ParentWindow;
+
 	bool IsOkButtonEnabled() const;
-	void OnOkButtonClicked();
-	void OnCancelButtonClicked();
+	FReply OnOkButtonClicked();
+	FReply OnCancelButtonClicked();
 	
 	// 获取所有有效的分类和子分类名称
 	void GetValidCategory();
