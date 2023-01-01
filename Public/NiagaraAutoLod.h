@@ -3,9 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "IAssetTools.h"
-#include "Modules/ModuleManager.h"
-#include "Toolkits/SelectModuleToolkit.h"
 
 class FNiagaraAutoLodModule : public IModuleInterface
 {
@@ -14,10 +11,10 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
-protected:
-	void RegisterAssetMenuAction();
-	void UnRegisterAssetMenuAction();
-	
 private:
-	TArray<TSharedRef<IAssetTypeActions>> RegisteredAssetTypeActions;
+	TSharedRef<FExtender> OnExtendCBAssetSelectionMenu(const TArray<FAssetData>& SelectedAssets);
+	void NiagaraAssetMenuExtension(FMenuBuilder& MenuBuilder, const TArray<FAssetData> SelectedAssets);
+	void ExtensionButtonClicked(TArray<FAssetData> SelectedAssets);
+	
+	FDelegateHandle ContentBrowserAssetExtenderDelegateHandle;
 };

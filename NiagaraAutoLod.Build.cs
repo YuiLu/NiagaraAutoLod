@@ -12,16 +12,14 @@ public class NiagaraAutoLod : ModuleRules
 			new string[] {
 				// ... add public include paths required here ...
 			}
-			);
+		);
 				
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
-				"NiagaraAutoLod/Private",
-				"NiagaraAutoLod/Private/AutoModules",
 				// ... add other private include paths required here ...
 			}
-			);
+		);
 			
 		
 		PublicDependencyModuleNames.AddRange(
@@ -30,7 +28,7 @@ public class NiagaraAutoLod : ModuleRules
 				"Core",
 				// ... add other public dependencies that you statically link with here ...
 			}
-			);
+		);
 			
 		
 		PrivateDependencyModuleNames.AddRange(
@@ -40,17 +38,18 @@ public class NiagaraAutoLod : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				"AppFramework",
-				"MainFrame",
-				"Niagara",
-				"NiagaraEditor",
-				"Sequencer",
-				"AssetTools",
-				"UnrealEd",
-				"EditorStyle",
+                "ContentBrowser",
+                "AppFramework",
+                "MainFrame",
+                "EditorStyle",
+                "AssetRegistry",
+                "InputCore",
+                "Niagara",
+                "NiagaraEditor",
+                "EditorScriptingUtilities",
 				// ... add private dependencies that you statically link with here ...	
 			}
-			);
+		);
 		
 		
 		DynamicallyLoadedModuleNames.AddRange(
@@ -59,5 +58,11 @@ public class NiagaraAutoLod : ModuleRules
 				// ... add any modules that your module loads dynamically here ...
 			}
 			);
-	}
+        PublicIncludePathModuleNames.AddRange(
+			new string[]
+			{
+                "Sequencer",
+			}
+		);
+    }
 }

@@ -1,20 +1,19 @@
 ﻿#include "SelectModuleToolkit.h"
 
 #include "Framework/Application/SlateApplication.h"
-#include "MainFrame/Public/Interfaces/IMainFrameModule.h"
-
-#include "Widgets/SModuleScriptAssetPickerList.h"
+#include "Interfaces/IMainFrameModule.h"
 #include "Widgets/SSelectModuleDialog.h"
 
 #define LOCTEXT_NAMESPACE "FSelectModuleToolkit"
 
 // Initialize
-void FSelectModuleToolkit::Initialize(UNiagaraSystem* InNiagaraAsset)
+void FSelectModuleToolkit::Initialize(TArray<FAssetData>& InNiagaraAssets)
 {
+	// 获取UE4主编辑器窗口的SWindow作为ParentWindow
 	IMainFrameModule& MainFrame = FModuleManager::LoadModuleChecked<IMainFrameModule>("MainFrame");
 	TSharedPtr<SWindow> ParentWindow = MainFrame.GetParentWindow();
-
-	TSharedRef<SSelectModuleDialog> SelectModuleDialog = SNew(SSelectModuleDialog);
+	// 添加自定义模态窗口
+	TSharedRef<SSelectModuleDialog> SelectModuleDialog = SNew(SSelectModuleDialog, InNiagaraAssets);
 	FSlateApplication::Get().AddModalWindow(SelectModuleDialog, ParentWindow);
 }
 
